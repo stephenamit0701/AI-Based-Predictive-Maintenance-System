@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+        <p class="text-muted">Welcome to the Machine Fault Detection System</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ predictions|length }}</h4>
+                        <p>Total Predictions</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-bar fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Predictions</h5>
+            </div>
+            <div class="card-body">
+                {% if predictions %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Temp</th>
+                                <th>Humidity</th>
+                                <th>Oil Level</th>
+                                <th>Gas Value</th>
+                                <th>Vibration</th>
+                                <th>Fault</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in predictions %}
+                            <tr>
+                                <td>{{ pred['created_at'][:16] }}</td>
+                                <td>{{ "%.2f"|format(pred['temperature']) }}°C</td>
+                                <td>{{ "%.2f"|format(pred['humidity']) }}%</td>
+                                <td>{{ "%.2f"|format(pred['oil_level']) }}</td>
+                                <td>{{ "%.2f"|format(pred['gas_value']) }}</td>
+                                <td>
+                                    {% if pred['vibration'] == 1 %}
+                                        <span class="badge bg-danger">High</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set fault_labels = {0: 'Normal', 1: 'High Heat', 2: 'High Humidity', 3: 'Low Oil', 4: 'Gas Leak'} %}
+                                    <span class="badge 
+                                        {% if pred['prediction'] == 0 %}bg-success
+                                        {% elif pred['prediction'] == 1 %}bg-warning
+                                        {% elif pred['prediction'] == 2 %}bg-info
+                                        {% elif pred['prediction'] == 3 %}bg-danger
+                                        {% else %}bg-dark{% endif %}">
+                                        {{ fault_labels.get(pred['prediction'], 'Unknown') }}
+                                    </span>
+                                </td>
+                                <td>{{ "%.2f"|format(pred['confidence'] * 100) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted">No predictions yet. <a href="{{ url_for('predict_page') }}">Make your first prediction!</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('predict_page') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-bolt"></i> Make New Prediction
+        </a>
+    </div>
+</div>
+{% endblock %}

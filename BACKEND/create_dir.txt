@@ -1,0 +1,49 @@
+import os
+
+# Define project structure
+structure = {
+    "machine_fault_detection": [
+        "app.py",
+        "database.py",
+        "models.py",
+        "requirements.txt",
+        {"static": [
+            {"css": ["style.css"]},
+            {"js": ["script.js"]}
+        ]},
+        {"templates": [
+            "base.html",
+            "login.html",
+            "register.html",
+            "dashboard.html",
+            "predict.html"
+        ]},
+        {"results": [
+            "lstm_model.h5",
+            "scaler.pkl"
+        ]}
+    ]
+}
+
+def create_structure(base_path, structure):
+    """
+    Recursively create folders and files from a structure dictionary.
+    """
+    for item in structure:
+        if isinstance(item, str):
+            file_path = os.path.join(base_path, item)
+            if not os.path.exists(file_path):
+                with open(file_path, 'w') as f:
+                    pass  # create empty file
+        elif isinstance(item, dict):
+            for folder, contents in item.items():
+                folder_path = os.path.join(base_path, folder)
+                os.makedirs(folder_path, exist_ok=True)
+                create_structure(folder_path, contents)
+
+# Create the root folder and structure
+root_folder = "machine_fault_detection"
+os.makedirs(root_folder, exist_ok=True)
+create_structure(root_folder, structure[root_folder])
+
+print(f"✅ Project structure created at: {os.path.abspath(root_folder)}")
